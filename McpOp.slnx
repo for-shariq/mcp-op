@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AuthServer/AuthServer.csproj" />
+    <Project Path="src/McpServer/McpServer.csproj" />
+  </Folder>
+</Solution>

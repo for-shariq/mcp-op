@@ -1,0 +1,63 @@
+# Microsoft 365 Agents Toolkit project file.
+#
+# Agents Toolkit normally generates this for you (Create a New Agent/App -> Declarative Agent ->
+# Add an Action -> Start with an MCP Server). This copy is here as a working reference and to
+# capture the two provisioning details that are easy to get wrong.
+#
+# yaml-language-server: $schema=https://aka.ms/teams-toolkit/v1.8/yaml.schema.json
+version: v1.8
+
+provision:
+  # Registers the app in Teams Developer Portal and writes TEAMS_APP_ID to .env.
+  - uses: teamsApp/create
+    with:
+      name: MCP-OAuth-Test-${{TEAMSFX_ENV}}
+    writeToEnvironmentFile:
+      teamsAppId: TEAMS_APP_ID
+
+  # Creates the OAuth auth config in the Microsoft Enterprise token store and writes its ID to
+  # .env, where ai-plugin.json picks it up as the runtime auth reference_id.
+  #
+  # Two details here cause failures that look like something else entirely:
+  #
+  #  1. applicableToApps MUST be AnyApp. Binding the registration to a specific Teams app ID makes
+  #     provisioning succeed and then every tool call return 404, because Copilot does not resolve
+  #     that app ID when it calls an MCP server.
+  #
+  #  2. Keep the appId field even though AnyApp makes it inert. The provisioning driver validates
+  #     appId unconditionally, so removing it breaks provisioning.
+  #
+  # This action only ever creates or skips: if configurationId already has a value it does nothing,
+  # and if it points at a registration you deleted it warns and does nothing. Use oauth/update to
+  # change an existing registration, and the Teams developer portal to delete one.
+  - uses: oauth/register
+    with:
+      name: mcp-op-test-oauth
+      flow: authorizationCode
+      appId: ${{TEAMS_APP_ID}}
+      applicableToApps: AnyApp
+      # Must match the url in the plugin manifest's MCP server spec object.
+      targetUrls:
+        - ${{MCP_SERVER_URL}}/mcp
+      clientId: ${{OAUTH_CLIENT_ID}}
+      clientSecret: ${{SECRET_OAUTH_CLIENT_SECRET}}
+      # PKCE is on by default and should stay on. Only set isPKCEEnabled: false if your provider
+      # cannot do PKCE; this test authorization server requires S256 and rejects plain.
+      isPKCEEnabled: true
+    writeToEnvironmentFile:
+      configurationId: MCP_OAUTH_AUTH_CONFIG_ID
+
+  # Substitutes ${{...}} placeholders in the app package and validates it against the schema.
+  - uses: teamsApp/validateManifest
+    with:
+      manifestPath: ./appPackage/manifest.json
+
+  - uses: teamsApp/zipAppPackage
+    with:
+      manifestPath: ./appPackage/manifest.json
+      outputZipPath: ./appPackage/build/appPackage.${{TEAMSFX_ENV}}.zip
+      outputFolder: ./appPackage/build
+
+  - uses: teamsApp/update
+    with:
+      appPackagePath: ./appPackage/build/appPackage.${{TEAMSFX_ENV}}.zip

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/copilot/plugin/v2.4/schema.json",
+  "schema_version": "v2.4",
+  "name_for_human": "MCP OAuth Test",
+  "namespace": "mcpoptest",
+  "description_for_human": "Test tools for verifying the Copilot OAuth 2.0 plugin flow.",
+  "description_for_model": "Test tools backed by a remote MCP server protected with OAuth 2.0. Use whoami to report who the signed-in user is, list_my_tasks to read their tasks, and create_task to add one. get_token_info and force_unauthorized are diagnostics for verifying the authentication configuration.",
+  "contact_email": "shariq.nasir@wtwco.com",
+  "capabilities": {
+    "conversation_starters": [
+      {
+        "title": "Who am I?",
+        "text": "Who am I signed in as?"
+      },
+      {
+        "title": "My tasks",
+        "text": "What tasks do I have?"
+      },
+      {
+        "title": "Add a task",
+        "text": "Add a task called 'review the OAuth config'"
+      }
+    ]
+  },
+  "functions": [],
+  "runtimes": [
+    {
+      "type": "RemoteMCPServer",
+      "auth": {
+        "type": "OAuthPluginVault",
+        "reference_id": "${{MCP_OAUTH_AUTH_CONFIG_ID}}"
+      },
+      "run_for_functions": [
+        "*"
+      ],
+      "spec": {
+        "url": "${{MCP_SERVER_URL}}/mcp"
+      }
+    }
+  ]
+}
