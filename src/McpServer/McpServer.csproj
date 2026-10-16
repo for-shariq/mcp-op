@@ -4,6 +4,9 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- No native <Name>.exe: some machines block unsigned executables via AppLocker/SRP. The app
+         then runs as `dotnet <Name>.dll`, launched by the signed dotnet host. -->
+    <UseAppHost>false</UseAppHost>
   </PropertyGroup>
 
   <ItemGroup>
