@@ -93,7 +93,9 @@ public sealed class TestTools(
     /// <c>mcp:tools.write</c> never reach this method: <see cref="ScopeEnforcementMiddleware"/>
     /// rejects them at the HTTP layer with a 403 and an insufficient_scope challenge.
     /// </summary>
-    [McpServerTool(Name = "create_task", Title = "Create a task", Destructive = false, Idempotent = false)]
+    // ReadOnly = false is set explicitly: Cowork asks the user to confirm when readOnlyHint is false,
+    // and an absent hint is not clearly the same thing.
+    [McpServerTool(Name = "create_task", Title = "Create a task", ReadOnly = false, Destructive = false, Idempotent = false)]
     [Description("Creates a new task for the signed-in user. Requires the mcp:tools.write scope.")]
     public object CreateTask(
         [Description("Short title describing the task to create.")] string title)
