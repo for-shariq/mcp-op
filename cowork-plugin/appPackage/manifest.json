@@ -1,0 +1,44 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.29/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.29",
+  "version": "1.0.0",
+  "id": "53cbdf30-3d45-4555-a569-e5823a35a9ce",
+  "developer": {
+    "name": "Shariq Nasir",
+    "websiteUrl": "${{MCP_SERVER_URL}}",
+    "privacyUrl": "${{MCP_SERVER_URL}}/privacy",
+    "termsOfUseUrl": "${{MCP_SERVER_URL}}/terms"
+  },
+  "name": {
+    "short": "MCP OAuth Test",
+    "full": "MCP OAuth Test Plugin for Copilot Cowork"
+  },
+  "description": {
+    "short": "Test tools behind an OAuth 2.0 protected MCP server.",
+    "full": "Verifies the Copilot Cowork plugin authentication flow end to end. Signs the user in with OAuth 2.0 against a self-hosted authorization server, then calls MCP tools that report the signed-in identity, token details and per-user tasks."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#0078D4",
+  "agentSkills": [
+    { "folder": "./skills/mcp-oauth-test" }
+  ],
+  "agentConnectors": [
+    {
+      "id": "mcp-oauth-test",
+      "displayName": "MCP OAuth Test Server",
+      "description": "Remote MCP server protected with OAuth 2.0. Tools: whoami, get_token_info, list_my_tasks, create_task, force_unauthorized.",
+      "toolSource": {
+        "remoteMcpServer": {
+          "mcpServerUrl": "${{MCP_SERVER_URL}}/mcp",
+          "authorization": {
+            "type": "OAuthPluginVault",
+            "referenceId": "${{OAUTH_REFERENCE_ID}}"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -22,25 +22,42 @@ public sealed class ClientStore
     public ClientStore(IOptions<AuthServerOptions> options, ILogger<ClientStore> logger)
     {
         _logger = logger;
-        var seed = options.Value.SeedClient;
+        var primary = options.Value.SeedClient;
 
-        var client = new OAuthClient
-        {
-            ClientId = seed.ClientId,
-            ClientSecret = seed.ClientSecret,
-            ClientName = seed.ClientName,
-            // Localhost entries let MCP Inspector and curl drive the same client during local testing.
-            RedirectUris =
+        // The primary client keeps the localhost callbacks so MCP Inspector and curl can drive it.
+        Seed(primary, primary.RedirectUris.Length > 0
+            ? primary.RedirectUris
+            :
             [
                 TeamsRedirectUri,
                 "http://localhost:6274/oauth/callback",
                 "http://127.0.0.1:6274/oauth/callback",
                 "http://localhost:8090/callback",
-            ],
+            ]);
+
+        foreach (var extra in options.Value.ExtraClients)
+        {
+            Seed(extra, extra.RedirectUris.Length > 0 ? extra.RedirectUris : [TeamsRedirectUri]);
+        }
+    }
+
+    private void Seed(SeedClientOptions seed, string[] redirectUris)
+    {
+        if (string.IsNullOrWhiteSpace(seed.ClientId) || string.IsNullOrWhiteSpace(seed.ClientSecret))
+        {
+            _logger.LogWarning("Skipping a configured client with no ClientId or ClientSecret");
+            return;
+        }
+
+        _clients[seed.ClientId] = new OAuthClient
+        {
+            ClientId = seed.ClientId,
+            ClientSecret = seed.ClientSecret,
+            ClientName = seed.ClientName,
+            RedirectUris = redirectUris,
         };
 
-        _clients[client.ClientId] = client;
-        _logger.LogInformation("Seeded static client {ClientId}", client.ClientId);
+        _logger.LogInformation("Seeded static client {ClientId} ({ClientName})", seed.ClientId, seed.ClientName);
     }
 
     public OAuthClient? Find(string? clientId) =>

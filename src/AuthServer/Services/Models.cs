@@ -21,6 +21,12 @@ public sealed class AuthServerOptions
 
     /// <summary>Statically registered client, for the Teams developer portal / Agents Toolkit path.</summary>
     public SeedClientOptions SeedClient { get; set; } = new();
+
+    /// <summary>
+    /// Additional statically registered clients, one per consumer (for example a Cowork plugin).
+    /// Each gets its own secret, so one can be rotated or revoked without touching the others.
+    /// </summary>
+    public List<SeedClientOptions> ExtraClients { get; set; } = [];
 }
 
 public sealed class SeedClientOptions
@@ -28,6 +34,12 @@ public sealed class SeedClientOptions
     public string ClientId { get; set; } = "copilot-test-client";
     public string ClientSecret { get; set; } = "copilot-test-secret";
     public string ClientName { get; set; } = "Microsoft 365 Copilot (static registration)";
+
+    /// <summary>
+    /// Allowed redirect URIs. Defaults to the one Microsoft 365 Copilot always uses; add local
+    /// callbacks here only for clients you also want to drive by hand.
+    /// </summary>
+    public string[] RedirectUris { get; set; } = [];
 }
 
 /// <summary>A registered OAuth client, whether seeded statically or created via RFC 7591 DCR.</summary>

@@ -10,6 +10,7 @@ Three pieces:
 | [src/AuthServer/](src/AuthServer/) | OAuth 2.1 authorization server — issues, refreshes and validates tokens; registers clients statically and via RFC 7591 DCR | 7029 |
 | [src/McpServer/](src/McpServer/) | Remote MCP server acting as an OAuth resource server, exposing five auth-aware test tools | 7071 |
 | [agent/](agent/) | Declarative agent app package whose plugin manifest points at the MCP server | — |
+| [cowork-plugin/](cowork-plugin/) | Copilot Cowork plugin (skill + authenticated MCP connector). Build with `scriptsuild-cowork-plugin.ps1`; steps in [docs/pluginsteps.md](docs/pluginsteps.md) | — |
 
 **Why a hand-rolled authorization server.** Microsoft Entra ID publishes no RFC 7591 registration
 endpoint, so dynamic client registration has nothing to register against, and the
