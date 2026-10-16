@@ -51,16 +51,19 @@ devtunnel create $TunnelId --allow-anonymous 2>&1 | Out-String | Write-Verbose
 devtunnel port create $TunnelId -p $AuthPort 2>&1 | Out-String | Write-Verbose
 devtunnel port create $TunnelId -p $McpPort 2>&1 | Out-String | Write-Verbose
 
+# This devtunnel CLI version never exposes portUri via JSON (show or port show), so
+# build the URL ourselves: https://<full-tunnel-id>-<port>.devtunnels.ms, where
+# <full-tunnel-id> is the service-decorated id (e.g. "mcp-op.inc1") returned by `show`.
 $details = devtunnel show $TunnelId --json | ConvertFrom-Json
-$ports = $details.tunnel.ports
+$fullTunnelId = $details.tunnel.tunnelId
 
-$authUrl = ($ports | Where-Object { $_.portNumber -eq $AuthPort }).portUri
-$mcpUrl = ($ports | Where-Object { $_.portNumber -eq $McpPort }).portUri
-
-if (-not $authUrl -or -not $mcpUrl) {
-    Write-Error "Could not resolve tunnel URLs. 'devtunnel show $TunnelId --json' returned:`n$($details | ConvertTo-Json -Depth 6)"
+if (-not $fullTunnelId) {
+    Write-Error "Could not resolve tunnel id. 'devtunnel show $TunnelId --json' returned:`n$($details | ConvertTo-Json -Depth 6)"
     exit 1
 }
+
+$authUrl = "https://$fullTunnelId-$AuthPort.devtunnels.ms"
+$mcpUrl = "https://$fullTunnelId-$McpPort.devtunnels.ms"
 
 $authUrl = $authUrl.TrimEnd('/')
 $mcpUrl = $mcpUrl.TrimEnd('/')
